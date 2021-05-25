@@ -1,7 +1,10 @@
-from os import execl
+#!/usr/bin/env python
+
 from Google import Create_Service
 import base64
 import re
+import uploader
+import os
 
 CLIENT_FILE='client.json'
 API_NAME = 'gmail'
@@ -19,6 +22,8 @@ claims_label_id = 'Label_3714798389628113853'
 #completed
 pbm_completed_label_id ='Label_6762915334295495346'
 claims_completed_label_id = 'Label_3024528762162722106'
+
+base_file_path = '/mnt/c/Users/tnicola/My Documents/Scripts/gmailBatchFetcher/'
 
 def search_messages_for_ids(service, label):
     try:
@@ -59,17 +64,14 @@ insurance_claims_email_list = search_messages_for_ids(service, claims_label_id)
 
 
 def get_subject_data(service, msg_ids, type):
-
-    # creating log file to upload in data loader
-    f = open(f'{type}.txt', "w+")                    
-    f.write('ID'+ '\n')
-
-    print('Log file created')
-    
     if (len(msg_ids) == 0):
-        print('No emails to find IDS in')
+        print('No emails to find IDS in: {type}' )
         return
     else: 
+        f = open(f'{base_file_path}/temp_logs/{type}.txt', "w+")                    
+        f.write('ID'+ '\n')
+        print('Log file created')
+
         for id in msg_ids:
 
             # creating log file to upload in data loader
@@ -89,7 +91,6 @@ def get_subject_data(service, msg_ids, type):
                 #creating set to not have duplicate SF ids
                 salesforce_ids_set = set()
             
-                # f.write(sfIds+ '\n')
                 if (len(salesforce_id_regex) > 0):
                     #write each Id to the file
                     for sfIds in salesforce_id_regex:
@@ -113,9 +114,14 @@ def get_subject_data(service, msg_ids, type):
             except Exception as e:
                 print('An error occured: ' + e)
         f.close()
-        print('completed the ' + type)
 
+        os.rename(base_file_path + 'temp_logs/' + type + '.txt', f"{base_file_path}upload_logs/{type}.csv")
+
+
+        print('completed the ' + type)
 
 
 get_subject_data(service, pbm_email_list, 'pbm')
 get_subject_data(service, insurance_claims_email_list, 'claims')
+
+uploader.doc_path_checking()

@@ -6,5 +6,5 @@
 
 Todo:
 1. organize the writing of the Ids into another function
-2. Upload the files to google sheets
+2. ~~Upload the files to google sheets~~
 3. refactor it all.
